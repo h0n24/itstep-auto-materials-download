@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>IT Step Materials</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main class="popup-shell">
+    <header class="hero">
+      <div class="hero__eyebrow">Chrome extension</div>
+      <h1>IT Step Materials</h1>
+      <p id="page-status" class="hero__status">Kontroluji aktivní tab…</p>
+    </header>
+
+    <section class="actions">
+      <button id="scan-button" class="button button--primary" type="button">Načíst seznam odkazů</button>
+      <button id="html-button" class="button" type="button">Export HTML indexu</button>
+      <button id="zip-button" class="button" type="button">Stáhnout ZIP</button>
+    </section>
+
+    <section class="summary-card">
+      <div id="status-pill" class="status-pill status-pill--idle">Připraveno</div>
+      <div id="summary-text" class="summary-text">Po otevření popupu se zobrazí poslední stav skenování.</div>
+    </section>
+
+    <section class="results-card">
+      <div class="results-card__header">
+        <h2>Seznam odkazů</h2>
+        <span id="count-badge" class="count-badge">0</span>
+      </div>
+
+      <p id="empty-state" class="empty-state">Nejprve načtěte seznam odkazů z aktivní stránky materiálů.</p>
+
+      <ul id="items-list" class="item-list" hidden></ul>
+
+      <section id="errors-section" class="errors-section" hidden>
+        <h3>Chyby</h3>
+        <ul id="errors-list" class="error-list"></ul>
+      </section>
+    </section>
+  </main>
+
+  <script src="../shared.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
