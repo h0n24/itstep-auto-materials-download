@@ -3,10 +3,11 @@
   var ZipBuilder = global.ItStepZipBuilder;
 
   chrome.runtime.onMessage.addListener(function onMessage(message, sender, sendResponse) {
-    if (!message || !message.action) {
+    if (!message || !message.action || !isOffscreenAction(message.action)) {
       return undefined;
     }
 
+    Shared.debugLog("offscreen:message", message.action);
     handleMessage(message)
       .then(function onSuccess(result) {
         sendResponse(result);
@@ -36,19 +37,22 @@
   }
 
   async function downloadHtmlIndex(payload) {
+    Shared.debugLog("offscreen:html:start", payload.items.length);
     var html = buildHtmlIndex(payload);
     var blob = new Blob([html], {
       type: "text/html;charset=utf-8"
     });
     var fileName = "itstep-materials-index_" + Shared.formatTimestampForFile(payload.generatedAt) + ".html";
-    var downloadId = await triggerDownload(blob, fileName);
+    var downloadUrl = prepareBlobDownload(blob);
     return {
       ok: true,
-      downloadId: downloadId
+      downloadUrl: downloadUrl,
+      fileName: fileName
     };
   }
 
   async function downloadZipArchive(payload) {
+    Shared.debugLog("offscreen:zip:start", payload.items.length);
     var zip = new ZipBuilder();
     var usedPaths = new Set();
     var downloadReport = [];
@@ -72,6 +76,7 @@
         var filePath = ensureUniqueZipPath(usedPaths, item.materialType + "/" + baseName + extension);
         var fileBytes = new Uint8Array(await response.arrayBuffer());
         zip.addFile(filePath, fileBytes, new Date());
+        Shared.debugLog("offscreen:zip:file", item.id, filePath, fileBytes.length);
         downloadReport.push({
           id: item.id,
           path: filePath,
@@ -80,6 +85,7 @@
         });
       } catch (error) {
         var serializedError = Shared.serializeError(error);
+        Shared.debugLog("offscreen:zip:file:error", item.id, serializedError);
         exportErrors.push({
           id: item.id,
           fileUrl: item.fileUrl,
@@ -103,11 +109,16 @@
     }, null, 2));
 
     var zipBlob = zip.build();
+    Shared.debugLog("offscreen:zip:done", {
+      failed: exportErrors.length,
+      sizeHint: payload.items.length
+    });
     var fileName = "itstep-materials_" + Shared.formatTimestampForFile(payload.generatedAt) + ".zip";
-    var downloadId = await triggerDownload(zipBlob, fileName);
+    var downloadUrl = prepareBlobDownload(zipBlob);
     return {
       ok: true,
-      downloadId: downloadId,
+      downloadUrl: downloadUrl,
+      fileName: fileName,
       failedCount: exportErrors.length
     };
   }
@@ -179,18 +190,16 @@
     return candidate;
   }
 
-  async function triggerDownload(blob, fileName) {
+  function prepareBlobDownload(blob) {
     var blobUrl = URL.createObjectURL(blob);
-    try {
-      return await chrome.downloads.download({
-        url: blobUrl,
-        filename: fileName,
-        saveAs: false
-      });
-    } finally {
-      setTimeout(function revoke() {
-        URL.revokeObjectURL(blobUrl);
-      }, 60000);
-    }
+    setTimeout(function revoke() {
+      URL.revokeObjectURL(blobUrl);
+    }, 60000);
+    return blobUrl;
+  }
+
+  function isOffscreenAction(action) {
+    return action === Shared.ACTIONS.OFFSCREEN_DOWNLOAD_HTML
+      || action === Shared.ACTIONS.OFFSCREEN_DOWNLOAD_ZIP;
   }
 })(globalThis);

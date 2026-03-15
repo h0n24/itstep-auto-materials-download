@@ -14,7 +14,7 @@ chrome.runtime.onStartup.addListener(function onStartup() {
 });
 
 chrome.runtime.onMessage.addListener(function onMessage(message, sender, sendResponse) {
-  if (!message || !message.action) {
+  if (!message || !message.action || !isBackgroundAction(message.action)) {
     return undefined;
   }
 
@@ -46,6 +46,7 @@ function createDefaultJobState() {
       message: "Připraveno."
     },
     result: null,
+    resultsByUrl: {},
     errorMessage: ""
   };
 }
@@ -93,6 +94,7 @@ async function broadcastJobState() {
 }
 
 async function handleMessage(message, sender) {
+  Shared.debugLog("background:message", message.action, sender && sender.tab && sender.tab.id);
   switch (message.action) {
     case Shared.ACTIONS.GET_JOB_STATE:
       return {
@@ -120,11 +122,23 @@ async function handleMessage(message, sender) {
 async function buildPopupState() {
   var activeTab = await getActiveTab();
   var jobState = await loadJobState();
+  var activeTabUrl = activeTab && activeTab.url || "";
+  var hasCachedResult = Boolean(
+    activeTabUrl
+    && jobState.resultsByUrl
+    && Object.prototype.hasOwnProperty.call(jobState.resultsByUrl, activeTabUrl)
+  );
+  var cachedResult = hasCachedResult ? jobState.resultsByUrl[activeTabUrl] : null;
+  var resolvedState = Object.assign({}, jobState, {
+    result: hasCachedResult
+      ? cachedResult
+      : (activeTabUrl && activeTabUrl === jobState.activeTabUrl ? jobState.result : null)
+  });
   return {
     activeTabId: activeTab && activeTab.id || null,
-    activeTabUrl: activeTab && activeTab.url || "",
-    pageSupported: Boolean(activeTab && Shared.isSupportedMaterialsUrl(activeTab.url || "")),
-    jobState: jobState
+    activeTabUrl: activeTabUrl,
+    pageSupported: Boolean(activeTab && Shared.isSupportedMaterialsUrl(activeTabUrl)),
+    jobState: resolvedState
   };
 }
 
@@ -163,7 +177,11 @@ async function startScan() {
   }
 
   var activeTab = await ensureMaterialsTab();
+  var stateBeforeScan = await loadJobState();
   await saveJobState({
+    resultsByUrl: Object.assign({}, stateBeforeScan.resultsByUrl || {}, {
+      [activeTab.url || ""]: null
+    }),
     status: Shared.JOB_STATUS.RUNNING,
     activeTabId: activeTab.id,
     activeTabUrl: activeTab.url || "",
@@ -180,6 +198,7 @@ async function startScan() {
 
   runningScanPromise = (async function runScan() {
     try {
+      Shared.debugLog("background:scan:start", activeTab.url);
       await ensureContentScript(activeTab.id);
       var response = await chrome.tabs.sendMessage(activeTab.id, {
         action: Shared.ACTIONS.COLLECT_MATERIALS
@@ -188,6 +207,11 @@ async function startScan() {
       if (!response || !response.ok) {
         throw new Error(response && response.error || "Content script nevrátil validní odpověď.");
       }
+
+      var currentState = await loadJobState();
+      var resultsByUrl = Object.assign({}, currentState.resultsByUrl || {}, {
+        [activeTab.url || ""]: response.result
+      });
 
       await patchJobState({
         status: Shared.JOB_STATUS.COMPLETED,
@@ -198,7 +222,13 @@ async function startScan() {
           message: "Sběr odkazů dokončen."
         },
         result: response.result,
+        resultsByUrl: resultsByUrl,
         errorMessage: ""
+      });
+      Shared.debugLog("background:scan:done", {
+        url: activeTab.url,
+        items: response.result.items.length,
+        errors: response.result.errors.length
       });
 
       return {
@@ -206,6 +236,7 @@ async function startScan() {
         jobState: await buildPopupState()
       };
     } catch (error) {
+      Shared.debugLog("background:scan:error", Shared.serializeError(error));
       await patchJobState({
         status: Shared.JOB_STATUS.ERROR,
         finishedAt: new Date().toISOString(),
@@ -264,12 +295,20 @@ async function openFileInTab(url) {
 }
 
 async function ensureResultForExport() {
-  await ensureMaterialsTab();
+  var activeTab = await ensureMaterialsTab();
   var state = await loadJobState();
-  if (state.status !== Shared.JOB_STATUS.COMPLETED || !state.result || !Array.isArray(state.result.items) || !state.result.items.length) {
+  var hasCachedResult = Boolean(
+    activeTab.url
+    && state.resultsByUrl
+    && Object.prototype.hasOwnProperty.call(state.resultsByUrl, activeTab.url)
+  );
+  var resolvedResult = hasCachedResult
+    ? state.resultsByUrl[activeTab.url]
+    : (activeTab.url && activeTab.url === state.activeTabUrl ? state.result : null);
+  if (state.status !== Shared.JOB_STATUS.COMPLETED || !resolvedResult || !Array.isArray(resolvedResult.items) || !resolvedResult.items.length) {
     throw new Error("Nejprve načtěte seznam odkazů.");
   }
-  return state.result;
+  return resolvedResult;
 }
 
 async function ensureOffscreenDocument() {
@@ -306,6 +345,7 @@ async function ensureOffscreenDocument() {
 async function downloadExport(offscreenAction) {
   var result = await ensureResultForExport();
   await ensureOffscreenDocument();
+  Shared.debugLog("background:export:start", offscreenAction, result.items.length);
 
   var response = await chrome.runtime.sendMessage({
     action: offscreenAction,
@@ -321,5 +361,29 @@ async function downloadExport(offscreenAction) {
     throw new Error(response && response.error || "Offscreen export selhal.");
   }
 
-  return response;
+  if (!chrome.downloads || !chrome.downloads.download) {
+    throw new Error("Chrome downloads API není v background service workeru dostupné.");
+  }
+
+  var downloadId = await chrome.downloads.download({
+    url: response.downloadUrl,
+    filename: response.fileName,
+    saveAs: false
+  });
+  Shared.debugLog("background:export:done", offscreenAction, downloadId, response.fileName);
+
+  return {
+    ok: true,
+    downloadId: downloadId,
+    failedCount: response.failedCount || 0
+  };
+}
+
+function isBackgroundAction(action) {
+  return action === Shared.ACTIONS.GET_JOB_STATE
+    || action === Shared.ACTIONS.SCAN_CURRENT_PAGE
+    || action === Shared.ACTIONS.DOWNLOAD_HTML_INDEX
+    || action === Shared.ACTIONS.DOWNLOAD_ZIP
+    || action === Shared.ACTIONS.OPEN_FILE
+    || action === Shared.ACTIONS.SCAN_PROGRESS;
 }

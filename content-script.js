@@ -44,6 +44,10 @@
 
     try {
       var collectedItems = extractTableItems();
+      Shared.debugLog("content:scan:start", {
+        url: global.location.href,
+        count: collectedItems.length
+      });
       if (!collectedItems.length) {
         throw new Error("Na stránce nebyly nalezeny žádné materiály.");
       }
@@ -66,7 +70,9 @@
           }
 
           item.fileUrl = fileUrl;
+          Shared.debugLog("content:item:resolved", item.id, fileUrl);
         } catch (error) {
+          Shared.debugLog("content:item:error", item.id, Shared.serializeError(error));
           errors.push({
             itemId: item.id,
             rowNumber: item.rowNumber,
@@ -81,6 +87,12 @@
 
       updateOverlay(overlay, collectedItems.length, collectedItems.length, "Sběr dokončen.");
       await sendProgress(collectedItems.length, collectedItems.length, "Sběr dokončen.");
+      Shared.debugLog("content:scan:done", {
+        resolved: collectedItems.filter(function hasUrl(entry) {
+          return Boolean(entry.fileUrl);
+        }).length,
+        errors: errors.length
+      });
 
       return {
         items: collectedItems.map(function stripDomRefs(item) {

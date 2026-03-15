@@ -26,6 +26,7 @@
   var STORAGE_KEYS = {
     JOB_STATE: "jobState"
   };
+  var DEBUG = true;
 
   var MATERIAL_TYPES = {
     BASE: "Zakladni-materialy",
@@ -219,10 +220,20 @@
     return [year, month, day].join("-") + "_" + [hours, minutes].join("-");
   }
 
+  function debugLog(scope) {
+    if (!DEBUG) {
+      return;
+    }
+
+    var args = Array.prototype.slice.call(arguments, 1);
+    console.log.apply(console, ["[IT Step][" + scope + "]"].concat(args));
+  }
+
   global.ItStepShared = {
     ACTIONS: ACTIONS,
     JOB_STATUS: JOB_STATUS,
     STORAGE_KEYS: STORAGE_KEYS,
+    DEBUG: DEBUG,
     MATERIAL_TYPES: MATERIAL_TYPES,
     MATERIAL_COLORS: MATERIAL_COLORS,
     normalizeText: normalizeText,
@@ -240,6 +251,7 @@
     parseFilenameFromContentDisposition: parseFilenameFromContentDisposition,
     extensionFromFileName: extensionFromFileName,
     extensionFromContentType: extensionFromContentType,
-    formatTimestampForFile: formatTimestampForFile
+    formatTimestampForFile: formatTimestampForFile,
+    debugLog: debugLog
   };
 })(globalThis);
