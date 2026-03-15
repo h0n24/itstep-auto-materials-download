@@ -1,6 +1,9 @@
 # Project Instructions
 
 - GitHub commit messages must always be written in English.
+- With every code change, always increase the extension version in `manifest.json`.
+- Version format must be `x.x`.
+- Example progression: `0.1` -> `0.2` -> ... -> `0.9` -> `1.0`.
 
 ## Goal
 
