@@ -42,7 +42,7 @@
     var blob = new Blob([html], {
       type: "text/html;charset=utf-8"
     });
-    var fileName = "itstep-materials-index_" + Shared.formatTimestampForFile(payload.generatedAt) + ".html";
+    var fileName = buildExportFileName(payload.subjectName, payload.generatedAt, "html");
     var downloadUrl = prepareBlobDownload(blob);
     return {
       ok: true,
@@ -113,7 +113,7 @@
       failed: exportErrors.length,
       sizeHint: payload.items.length
     });
-    var fileName = "itstep-materials_" + Shared.formatTimestampForFile(payload.generatedAt) + ".zip";
+    var fileName = buildExportFileName(payload.subjectName, payload.generatedAt, "zip");
     var downloadUrl = prepareBlobDownload(zipBlob);
     return {
       ok: true,
@@ -132,7 +132,7 @@
         "<td>" + Shared.escapeHtml(item.columnTitle) + "</td>",
         "<td>" + Shared.escapeHtml(item.chipLabel) + "</td>",
         "<td>" + Shared.escapeHtml(item.materialType) + "</td>",
-        "<td><a href=\"" + Shared.escapeHtml(item.fileUrl) + "\" target=\"_blank\" rel=\"noreferrer\">Otevřít soubor</a></td>",
+        "<td><a href=\"" + Shared.escapeHtml(item.fileUrl) + "\" target=\"_blank\" rel=\"noreferrer\">Otevrit soubor</a></td>",
         "</tr>"
       ].join("");
     }).join("");
@@ -165,16 +165,22 @@
       "<body>",
       "<div class=\"shell\">",
       "<h1>IT Step Materials Index</h1>",
-      "<p class=\"meta\">Vygenerováno: " + Shared.escapeHtml(new Date(payload.generatedAt).toLocaleString("cs-CZ")) + " · Položek: " + Shared.escapeHtml(String(payload.items.length)) + " · Naskenováno: " + Shared.escapeHtml(String(payload.scannedCount)) + "</p>",
+      "<p class=\"meta\">Predmet: " + Shared.escapeHtml(payload.subjectName || "Neuvedeno") + " | Vygenerovano: " + Shared.escapeHtml(new Date(payload.generatedAt).toLocaleString("cs-CZ")) + " | Polozek: " + Shared.escapeHtml(String(payload.items.length)) + " | Naskenovano: " + Shared.escapeHtml(String(payload.scannedCount)) + "</p>",
       "<table>",
-      "<thead><tr><th>Řádek</th><th>Název bloku</th><th>Sloupec</th><th>Štítek</th><th>Typ</th><th>Soubor</th></tr></thead>",
+      "<thead><tr><th>Radek</th><th>Nazev bloku</th><th>Sloupec</th><th>Stitek</th><th>Typ</th><th>Soubor</th></tr></thead>",
       "<tbody>" + rows + "</tbody>",
       "</table>",
-      errors ? "<section class=\"errors\"><h2>Chyby při sběru</h2><ul>" + errors + "</ul></section>" : "",
+      errors ? "<section class=\"errors\"><h2>Chyby pri sberu</h2><ul>" + errors + "</ul></section>" : "",
       "</div>",
       "</body>",
       "</html>"
     ].join("");
+  }
+
+  function buildExportFileName(subjectName, generatedAt, extension) {
+    var safeSubjectName = Shared.slugifySegment(subjectName, "itstep-materials");
+    var exportDate = Shared.formatDateForFile(generatedAt);
+    return safeSubjectName + "_" + exportDate + "." + extension;
   }
 
   function ensureUniqueZipPath(usedPaths, rawPath) {

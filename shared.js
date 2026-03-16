@@ -222,6 +222,14 @@
     return [year, month, day].join("-") + "_" + [hours, minutes].join("-");
   }
 
+  function formatDateForFile(dateLike) {
+    var date = dateLike ? new Date(dateLike) : new Date();
+    var year = date.getFullYear();
+    var month = String(date.getMonth() + 1).padStart(2, "0");
+    var day = String(date.getDate()).padStart(2, "0");
+    return [year, month, day].join("-");
+  }
+
   function debugLog(scope) {
     if (!DEBUG) {
       return;
@@ -254,6 +262,7 @@
     extensionFromFileName: extensionFromFileName,
     extensionFromContentType: extensionFromContentType,
     formatTimestampForFile: formatTimestampForFile,
+    formatDateForFile: formatDateForFile,
     debugLog: debugLog
   };
 })(globalThis);

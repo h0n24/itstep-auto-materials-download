@@ -43,10 +43,12 @@
     var errors = [];
 
     try {
+      var subjectName = extractSubjectName();
       var collectedItems = extractTableItems();
       Shared.debugLog("content:scan:start", {
         url: global.location.href,
-        count: collectedItems.length
+        count: collectedItems.length,
+        subjectName: subjectName
       });
       if (!collectedItems.length) {
         throw new Error("Na stránce nebyly nalezeny žádné materiály.");
@@ -95,6 +97,7 @@
       });
 
       return {
+        subjectName: subjectName,
         items: collectedItems.map(function stripDomRefs(item) {
           return {
             id: item.id,
@@ -169,6 +172,19 @@
     });
 
     return collected;
+  }
+
+  function extractSubjectName() {
+    var subjectNode = document.querySelector(
+      "lib-expanded-select[formcontrolname=\"id_spec\"] .mat-mdc-select-min-line, "
+      + "lib-expanded-select[formcontrolname=\"id_spec\"] .mat-mdc-select-value-text"
+    );
+    if (!subjectNode) {
+      Shared.debugLog("content:subject:missing");
+      return "";
+    }
+
+    return Shared.normalizeText(subjectNode.innerText || subjectNode.textContent || "");
   }
 
   function detectMaterialType(chip) {

@@ -58,6 +58,8 @@ Implement a Chrome extension for `https://lb.itstep.org/materials` that:
   - `materialType`
   - `fileUrl`
   - `sourceUrl`
+- Scan result metadata
+  - `subjectName`
 
 ## Page Selectors And Behavior
 
@@ -75,6 +77,9 @@ Implement a Chrome extension for `https://lb.itstep.org/materials` that:
   - accepted targets:
     - `fsx1.itstep.org/api/v1/files/...`
     - `materials.itstep.org/content/...`
+- Subject selector for export naming:
+  - `lib-expanded-select[formcontrolname="id_spec"] .mat-mdc-select-min-line`
+  - do not rely on the localized visible label text like `Předmět`
 
 ## Material Type Detection
 
@@ -96,10 +101,12 @@ Fallback:
 
 - HTML export:
   - simple standalone index with row, block title, column, chip label, type and direct link
+  - filename is based on selected subject + current date
 - ZIP export:
   - top-level folders:
     - `Zakladni-materialy/`
     - `Doplnkove-materialy/`
+  - archive filename is based on selected subject + current date
   - filenames are built from:
     - row number
     - column title

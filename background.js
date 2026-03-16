@@ -350,6 +350,7 @@ async function downloadExport(offscreenAction) {
   var response = await chrome.runtime.sendMessage({
     action: offscreenAction,
     payload: {
+      subjectName: result.subjectName || "",
       items: result.items,
       errors: result.errors || [],
       scannedCount: result.scannedCount || result.items.length,

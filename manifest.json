@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "IT Step Materials Downloader",
-  "version": "0.3",
+  "version": "0.4",
   "description": "Collect direct material links from lb.itstep.org/materials and export them as an HTML index or ZIP archive.",
   "permissions": [
     "activeTab",
