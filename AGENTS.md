@@ -4,6 +4,8 @@
 - With every code change, always increase the extension version in `manifest.json`.
 - Version format must be `x.x`.
 - Example progression: `0.1` -> `0.2` -> ... -> `0.9` -> `1.0`.
+- With every code change, rebuild the Chrome Web Store package with `build-cws-package.ps1`.
+- Keep the stable upload artifact at `chrome-web-store/it-step-materials-downloader-latest.zip`.
 
 ## Goal
 

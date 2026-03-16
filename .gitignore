@@ -1,0 +1,3 @@
+.cws-package-stage/
+chrome-web-store/*.zip
+chrome-web-store/package-info.json
