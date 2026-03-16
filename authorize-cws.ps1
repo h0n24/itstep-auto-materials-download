@@ -11,12 +11,12 @@ $ErrorActionPreference = "Stop"
 
 if (-not $CredentialFile) {
   $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-  $CredentialFile = Join-Path $scriptRoot "_cws-credentials.json"
+  $CredentialFile = Join-Path $scriptRoot "cws-credentials.local.json"
 }
 
 if (-not $TokenFile) {
   $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-  $TokenFile = Join-Path $scriptRoot "_cws-token.json"
+  $TokenFile = Join-Path $scriptRoot "cws-token.local.json"
 }
 
 function ConvertTo-Base64Url {

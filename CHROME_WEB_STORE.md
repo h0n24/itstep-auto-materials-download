@@ -21,12 +21,12 @@ Use `it-step-materials-downloader-latest.zip` for the manual update in the Chrom
 
 Chrome Web Store supports direct upload from the local machine through the official API.
 
-## Local OAuth setup with `_cws-credentials.json`
+## Local OAuth setup with `cws-credentials.local.json`
 
 Place your Google OAuth desktop client file at:
 
 ```text
-_cws-credentials.json
+cws-credentials.local.json
 ```
 
 Then authorize once:
@@ -38,7 +38,7 @@ powershell -ExecutionPolicy Bypass -File .\authorize-cws.ps1
 This opens the Google login page in the browser and stores the refresh token in:
 
 ```text
-_cws-token.json
+cws-token.local.json
 ```
 
 Both files are ignored by git.

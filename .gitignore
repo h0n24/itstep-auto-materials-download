@@ -1,5 +1,5 @@
 .cws-package-stage/
 chrome-web-store/*.zip
 chrome-web-store/package-info.json
-_cws-credentials.json
-_cws-token.json
+cws-credentials.local.json
+cws-token.local.json

@@ -20,11 +20,11 @@ if (-not $PackagePath) {
 }
 
 if (-not $CredentialFile) {
-  $CredentialFile = Join-Path $scriptRoot "_cws-credentials.json"
+  $CredentialFile = Join-Path $scriptRoot "cws-credentials.local.json"
 }
 
 if (-not $TokenFile) {
-  $TokenFile = Join-Path $scriptRoot "_cws-token.json"
+  $TokenFile = Join-Path $scriptRoot "cws-token.local.json"
 }
 
 function Get-InstalledCredentials {
@@ -148,10 +148,10 @@ function Get-AccessToken {
   }
 
   if ($installedCredentials) {
-    throw "Found _cws-credentials.json, but no refresh token is available. Run .\authorize-cws.ps1 first."
+    throw "Found cws-credentials.local.json, but no refresh token is available. Run .\authorize-cws.ps1 first."
   }
 
-  throw "Set CWS_ACCESS_TOKEN, or prepare _cws-credentials.json + _cws-token.json, or use CWS_CLIENT_ID/CWS_REFRESH_TOKEN, or CWS_SERVICE_ACCOUNT_EMAIL."
+  throw "Set CWS_ACCESS_TOKEN, or prepare cws-credentials.local.json + cws-token.local.json, or use CWS_CLIENT_ID/CWS_REFRESH_TOKEN, or CWS_SERVICE_ACCOUNT_EMAIL."
 }
 
 if (-not (Test-Path $PackagePath)) {
