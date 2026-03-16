@@ -283,7 +283,7 @@ async function handleScanProgress(message, sender) {
 }
 
 async function openFileInTab(url) {
-  if (!Shared.isFsxFileUrl(url)) {
+  if (!Shared.isMaterialFileUrl(url)) {
     throw new Error("Neplatný odkaz na soubor.");
   }
 

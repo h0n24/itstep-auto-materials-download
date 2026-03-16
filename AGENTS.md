@@ -12,7 +12,10 @@ Implement a Chrome extension for `https://lb.itstep.org/materials` that:
 - runs from the extension `browserAction` popup
 - scans the currently open `/materials` page only
 - opens each visible material chip modal sequentially
-- extracts the direct `https://fsx1.itstep.org/api/v1/files/...` link from the modal
+- extracts the direct material link from the modal
+  - supported direct domains:
+    - `https://fsx1.itstep.org/api/v1/files/...`
+    - `https://materials.itstep.org/content/...`
 - shows the collected links in the popup
 - exports the collected result as:
   - an HTML index
@@ -68,7 +71,10 @@ Implement a Chrome extension for `https://lb.itstep.org/materials` that:
 - Modal:
   - `mat-dialog-container`
 - Direct file link in modal:
-  - `a[href*="fsx1.itstep.org/api/v1/files/"]`
+  - `a[href]`
+  - accepted targets:
+    - `fsx1.itstep.org/api/v1/files/...`
+    - `materials.itstep.org/content/...`
 
 ## Material Type Detection
 

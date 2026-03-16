@@ -87,8 +87,10 @@
     }
   }
 
-  function isFsxFileUrl(url) {
-    return /^https:\/\/fsx1\.itstep\.org\/api\/v1\/files\//i.test(String(url || ""));
+  function isMaterialFileUrl(url) {
+    var value = String(url || "");
+    return /^https:\/\/fsx1\.itstep\.org\/api\/v1\/files\//i.test(value)
+      || /^https:\/\/materials\.itstep\.org\/content\//i.test(value);
   }
 
   function parseColorToHex(input) {
@@ -242,7 +244,7 @@
     escapeHtml: escapeHtml,
     delay: delay,
     isSupportedMaterialsUrl: isSupportedMaterialsUrl,
-    isFsxFileUrl: isFsxFileUrl,
+    isMaterialFileUrl: isMaterialFileUrl,
     parseColorToHex: parseColorToHex,
     materialTypeFromColor: materialTypeFromColor,
     buildItemId: buildItemId,

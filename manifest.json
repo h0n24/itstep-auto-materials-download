@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "IT Step Materials Downloader",
-  "version": "0.2",
+  "version": "0.3",
   "description": "Collect direct material links from lb.itstep.org/materials and export them as an HTML index or ZIP archive.",
   "permissions": [
     "activeTab",
@@ -12,7 +12,8 @@
   ],
   "host_permissions": [
     "https://lb.itstep.org/*",
-    "https://fsx1.itstep.org/*"
+    "https://fsx1.itstep.org/*",
+    "https://materials.itstep.org/*"
   ],
   "background": {
     "service_worker": "background.js"

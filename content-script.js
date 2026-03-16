@@ -65,8 +65,8 @@
           await openChipModal(item._chip);
           var fileUrl = await readFileUrlFromModal();
 
-          if (!Shared.isFsxFileUrl(fileUrl)) {
-            throw new Error("V modalu nebyl nalezen platný FSX odkaz.");
+          if (!Shared.isMaterialFileUrl(fileUrl)) {
+            throw new Error("V modalu nebyl nalezen platný odkaz na soubor.");
           }
 
           item.fileUrl = fileUrl;
@@ -200,20 +200,30 @@
     }, 6000, "Modal nebyl nalezen.");
 
     var anchor = await waitFor(function getAnchor() {
-      return dialog.querySelector('a[href*="fsx1.itstep.org/api/v1/files/"]');
+      var anchors = Array.from(dialog.querySelectorAll("a[href]"));
+      return anchors.find(function findDownloadLink(link) {
+        return Shared.isMaterialFileUrl(link.getAttribute("href") || "");
+      });
     }, 6000, "V modalu chybí odkaz na soubor.");
 
     var href = anchor.getAttribute("href") || "";
-    if (Shared.isFsxFileUrl(href)) {
+    if (Shared.isMaterialFileUrl(href)) {
       return href;
     }
 
-    var iframe = dialog.querySelector('iframe[src*="fsx1.itstep.org/api/v1/files/"]');
+    var iframe = dialog.querySelector("iframe[src]");
     if (!iframe) {
+      Shared.debugLog("content:item:modal-links", Array.from(dialog.querySelectorAll("a[href]")).map(function mapLink(link) {
+        return link.getAttribute("href") || "";
+      }));
       return "";
     }
 
     var source = iframe.getAttribute("src") || "";
+    if (Shared.isMaterialFileUrl(source)) {
+      return source;
+    }
+
     if (source.includes("?inline")) {
       return source.replace("?inline", "?inline=true");
     }
