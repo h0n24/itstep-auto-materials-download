@@ -23,11 +23,22 @@ Chrome Web Store supports direct upload from the local machine through the offic
 
 ## Local OAuth setup with `cws-credentials.local.json`
 
-Place your Google OAuth desktop client file at:
+Place your Google OAuth client JSON at:
 
 ```text
 cws-credentials.local.json
 ```
+
+Recommended setup:
+
+- Create the OAuth client in Google Cloud as `Web application`
+- Add this exact redirect URI:
+
+```text
+http://127.0.0.1:8765/
+```
+
+- Then download the JSON and save it as `cws-credentials.local.json`
 
 Then authorize once:
 

@@ -27,7 +27,7 @@ if (-not $TokenFile) {
   $TokenFile = Join-Path $scriptRoot "cws-token.local.json"
 }
 
-function Get-InstalledCredentials {
+function Get-OAuthClientConfig {
   param(
     [Parameter(Mandatory = $true)]
     [string]$Path
@@ -38,11 +38,43 @@ function Get-InstalledCredentials {
   }
 
   $json = Get-Content -Raw $Path | ConvertFrom-Json
-  if (-not $json.installed) {
-    throw "Credential file must contain an 'installed' section."
+  $clientSection = $null
+  $clientType = ""
+
+  $hasWeb = [bool]$json.PSObject.Properties["web"]
+  $hasInstalled = [bool]$json.PSObject.Properties["installed"]
+
+  if ($hasWeb) {
+    $clientSection = $json.web
+    $clientType = "web"
+  }
+  elseif ($hasInstalled) {
+    $clientSection = $json.installed
+    $clientType = "installed"
+  }
+  else {
+    throw "Credential file must contain either a 'web' or 'installed' section."
   }
 
-  return $json.installed
+  if (-not $clientSection.client_id) {
+    throw "Credential file is missing client_id."
+  }
+  if (-not $clientSection.token_uri) {
+    throw "Credential file is missing token_uri."
+  }
+
+  $hasClientSecret = [bool]$clientSection.PSObject.Properties["client_secret"]
+
+  if ($clientType -eq "web" -and (-not $hasClientSecret -or -not $clientSection.client_secret)) {
+    throw "Web OAuth client JSON must contain client_secret."
+  }
+
+  return [ordered]@{
+    type = $clientType
+    client_id = [string]$clientSection.client_id
+    client_secret = if ($hasClientSecret -and $clientSection.client_secret) { [string]$clientSection.client_secret } else { "" }
+    token_uri = [string]$clientSection.token_uri
+  }
 }
 
 function Get-TokenFileData {
@@ -119,16 +151,15 @@ function Get-AccessToken {
     }
   }
 
-  $installedCredentials = Get-InstalledCredentials -Path $CredentialFile
+  $clientConfig = Get-OAuthClientConfig -Path $CredentialFile
   $tokenFileData = Get-TokenFileData -Path $TokenFile
 
-  if ($installedCredentials -and $tokenFileData -and $tokenFileData.refresh_token) {
-    $tokenUri = if ($tokenFileData.token_uri) { [string]$tokenFileData.token_uri } else { [string]$installedCredentials.token_uri }
-    $clientSecret = if ($installedCredentials.client_secret) { [string]$installedCredentials.client_secret } else { "" }
+  if ($clientConfig -and $tokenFileData -and $tokenFileData.refresh_token) {
+    $tokenUri = if ($tokenFileData.token_uri) { [string]$tokenFileData.token_uri } else { [string]$clientConfig.token_uri }
     return [ordered]@{
       token = Request-AccessTokenFromRefreshToken `
-        -ClientId ([string]$installedCredentials.client_id) `
-        -ClientSecret $clientSecret `
+        -ClientId $clientConfig.client_id `
+        -ClientSecret $clientConfig.client_secret `
         -RefreshToken ([string]$tokenFileData.refresh_token) `
         -TokenUri $tokenUri
       authMode = "credentials-file+token-file"
@@ -147,7 +178,7 @@ function Get-AccessToken {
     }
   }
 
-  if ($installedCredentials) {
+  if ($clientConfig) {
     throw "Found cws-credentials.local.json, but no refresh token is available. Run .\authorize-cws.ps1 first."
   }
 

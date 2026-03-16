@@ -6,6 +6,7 @@
 - Example progression: `0.1` -> `0.2` -> ... -> `0.9` -> `1.0`.
 - With every code change, rebuild the Chrome Web Store package with `build-cws-package.ps1`.
 - Keep the stable upload artifact at `chrome-web-store/it-step-materials-downloader-latest.zip`.
+- Whenever the extension version changes, remind the user to run `powershell -ExecutionPolicy Bypass -File .\publish-cws.ps1`.
 - Never commit local Chrome Web Store OAuth files such as `cws-credentials.local.json` or `cws-token.local.json`.
 
 ## Goal
