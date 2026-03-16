@@ -10,6 +10,7 @@ powershell -ExecutionPolicy Bypass -File .\build-cws-package.ps1
 
 This creates:
 
+- `assets/icon-128.png` can be used directly for the Chrome Web Store listing assets
 - `chrome-web-store/it-step-materials-downloader-<version>.zip`
 - `chrome-web-store/it-step-materials-downloader-latest.zip`
 - `chrome-web-store/package-info.json`

@@ -57,6 +57,7 @@ if (-not $version -or $version -notmatch '^\d+\.\d+$') {
 }
 
 $packageItems = @(
+  "assets",
   "manifest.json",
   "background.js",
   "content-script.js",

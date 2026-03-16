@@ -1,8 +1,14 @@
 {
   "manifest_version": 3,
   "name": "IT Step Materials Downloader",
-  "version": "0.7",
+  "version": "0.9",
   "description": "Collect direct material links from lb.itstep.org/materials and export them as an HTML index or ZIP archive.",
+  "icons": {
+    "16": "assets/icon-16.png",
+    "32": "assets/icon-32.png",
+    "48": "assets/icon-48.png",
+    "128": "assets/icon-128.png"
+  },
   "permissions": [
     "activeTab",
     "scripting",
@@ -20,7 +26,13 @@
   },
   "action": {
     "default_title": "IT Step Materials",
-    "default_popup": "popup/popup.html"
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "assets/icon-16.png",
+      "32": "assets/icon-32.png",
+      "48": "assets/icon-48.png",
+      "128": "assets/icon-128.png"
+    }
   },
   "content_scripts": [
     {

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title>IT Step Materials Downloader Icon</title>
+  <rect width="128" height="128" rx="28" fill="#1D6FEF"/>
+  <path
+    d="M31 97V34L64 75L97 34V97"
+    fill="none"
+    stroke="#FFFFFF"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="16"
+  />
+</svg>
