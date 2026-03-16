@@ -6,6 +6,7 @@
 - Example progression: `0.1` -> `0.2` -> ... -> `0.9` -> `1.0`.
 - With every code change, rebuild the Chrome Web Store package with `build-cws-package.ps1`.
 - Keep the stable upload artifact at `chrome-web-store/it-step-materials-downloader-latest.zip`.
+- Never commit local Chrome Web Store OAuth files such as `_cws-credentials.json` or `_cws-token.json`.
 
 ## Goal
 

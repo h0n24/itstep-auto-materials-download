@@ -21,6 +21,28 @@ Use `it-step-materials-downloader-latest.zip` for the manual update in the Chrom
 
 Chrome Web Store supports direct upload from the local machine through the official API.
 
+## Local OAuth setup with `_cws-credentials.json`
+
+Place your Google OAuth desktop client file at:
+
+```text
+_cws-credentials.json
+```
+
+Then authorize once:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\authorize-cws.ps1
+```
+
+This opens the Google login page in the browser and stores the refresh token in:
+
+```text
+_cws-token.json
+```
+
+Both files are ignored by git.
+
 Dry run:
 
 ```powershell
@@ -33,9 +55,6 @@ powershell -ExecutionPolicy Bypass -File .\publish-cws.ps1 `
 Upload only:
 
 ```powershell
-$env:CWS_CLIENT_ID = "..."
-$env:CWS_CLIENT_SECRET = "..."
-$env:CWS_REFRESH_TOKEN = "..."
 $env:CWS_PUBLISHER_ID = "..."
 $env:CWS_EXTENSION_ID = "..."
 
@@ -51,6 +70,7 @@ powershell -ExecutionPolicy Bypass -File .\publish-cws.ps1 -Publish
 ## Supported auth modes
 
 - `CWS_ACCESS_TOKEN`
+- `_cws-credentials.json` + `_cws-token.json`
 - `CWS_CLIENT_ID` + `CWS_CLIENT_SECRET` + `CWS_REFRESH_TOKEN`
 - `CWS_SERVICE_ACCOUNT_EMAIL` with local `gcloud` installed
 
@@ -59,4 +79,5 @@ powershell -ExecutionPolicy Bypass -File .\publish-cws.ps1 -Publish
 1. Make the code change.
 2. Increase `manifest.json` version.
 3. Run `build-cws-package.ps1`.
-4. Upload `chrome-web-store/it-step-materials-downloader-latest.zip` manually, or call `publish-cws.ps1`.
+4. If this machine is not authorized yet, run `authorize-cws.ps1` once.
+5. Upload `chrome-web-store/it-step-materials-downloader-latest.zip` manually, or call `publish-cws.ps1`.
